@@ -32,7 +32,7 @@ A **deep learning NLP model** that learns patterns from text and predicts what w
 ## 📦 Installation
 
 ```bash
-git clone https://github.com/Pokemon455/LSTM-prediction-next-word-.git
+git clone https://github.com/arbaz-builds/LSTM-prediction-next-word-.git
 cd LSTM-prediction-next-word-
 pip install torch numpy
 ```
@@ -74,12 +74,12 @@ The model achieves strong perplexity scores on held-out test data with proper tr
 
 ## 🌟 Star this repo if it helped you!
 
-[![GitHub stars](https://img.shields.io/github/stars/Pokemon455/LSTM-prediction-next-word-?style=social)](https://github.com/Pokemon455/LSTM-prediction-next-word-/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/arbaz-builds/LSTM-prediction-next-word-?style=social)](https://github.com/arbaz-builds/LSTM-prediction-next-word-/stargazers)
 
 ---
 
 ## 👨‍💻 Author
 
 **Arbaz** — AI/ML Developer
-- GitHub: [@Pokemon455](https://github.com/Pokemon455)
+- GitHub: [@arbaz-builds](https://github.com/arbaz-builds)
 - Bio: 🤖 AI/ML Developer | FastMCP • LangChain • PyTorch
