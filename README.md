@@ -1,85 +1,153 @@
+<div align="center">
+
 # 🧠 LSTM Next Word Prediction
 
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python)](https://python.org)
-[![PyTorch](https://img.shields.io/badge/PyTorch-Latest-red?style=for-the-badge&logo=pytorch)](https://pytorch.org)
-[![NLP](https://img.shields.io/badge/NLP-LSTM-orange?style=for-the-badge)](https://en.wikipedia.org/wiki/Long_short-term_memory)
-[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+**A custom LSTM neural network that predicts the next word in any sentence — built from scratch with PyTorch & GPT-4 tokenizer.**
 
-> 🔮 Predict the **next word** in a sentence using **LSTM (Long Short-Term Memory)** neural networks — built with PyTorch!
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![tiktoken](https://img.shields.io/badge/Tokenizer-tiktoken%20cl100k-412991?style=for-the-badge)](https://github.com/openai/tiktoken)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
----
+> *Like your phone keyboard suggestions — but powered by a real LSTM trained from scratch.*
 
-## 🚀 What is this?
-
-A **deep learning NLP model** that learns patterns from text and predicts what word comes next. Great for:
-- 📝 Auto-complete systems
-- 💬 Chatbot response generation
-- 📖 Language modeling research
-- 🎓 Learning LSTM / RNN architectures
+</div>
 
 ---
 
-## ✨ Features
+## ✨ What It Does
 
-- 🧠 LSTM-based sequence model
-- 🔥 Built with PyTorch
-- 📊 Trained on custom text data
-- 🎯 Top-K word prediction
-- 📈 Training loss visualization
+Type any partial sentence → the model predicts the **most likely next words**.
+
+```
+Input:  "The weather today is"
+Output: "The weather today is sunny and warm" ✅
+```
 
 ---
 
-## 📦 Installation
+## 🏗️ Architecture
 
+```
+Raw Text
+   │
+   ▼
+tiktoken (cl100k_base)        ← Same tokenizer as GPT-4
+   │
+   ▼
+Token Embeddings (256-dim)
+   │
+   ▼
+LSTM Layer (512 hidden units)
+   │
+   ▼
+FC Layers  →  ReLU  →  Dropout(0.3)
+   │
+   ▼
+Softmax → Next Token
+```
+
+| Component | Detail |
+|-----------|--------|
+| **Tokenizer** | tiktoken `cl100k_base` (GPT-4 style) |
+| **Embedding** | 256-dim learned embeddings |
+| **LSTM** | 512 hidden units, 1 layer |
+| **Classifier** | 3-layer FC with ReLU + Dropout |
+| **Dataset** | Chatbot Q&A pairs (CSV) |
+| **Hardware** | Auto GPU/CPU detection |
+
+---
+
+## 🛠️ Tech Stack
+
+| Library | Purpose |
+|---------|---------|
+| `PyTorch` | LSTM model & training loop |
+| `tiktoken` | GPT-4 style tokenization |
+| `Pandas` | Dataset loading & preprocessing |
+| `NumPy` | Numerical operations |
+
+---
+
+## 🚀 Quick Start
+
+### 1. Clone & Install
 ```bash
 git clone https://github.com/arbaz-builds/LSTM-prediction-next-word-.git
 cd LSTM-prediction-next-word-
-pip install torch numpy
+pip install -r requirements.txt
 ```
 
-## 🏃 Usage
+### 2. Train the Model
+```bash
+python train.py
+```
+> 💡 **Kaggle users:** Update the dataset path in `train.py` to `/kaggle/input/your-dataset/`
 
-```python
-from model import NextWordPredictor
+This will save `best_model.pth` in the project folder.
 
-predictor = NextWordPredictor()
-predictor.load("model.pth")
+### 3. Run Inference
+```bash
+python inference.py
+```
 
-result = predictor.predict("The weather today is")
-print(result)  # → "sunny"
+```
+🧠 LSTM Text Generator
+   Device  : cuda
+   Vocab   : 100,277 tokens
+   Type 'exit' to quit
+
+Prompt: The weather today is
+Output: The weather today is sunny and pleasant outside
 ```
 
 ---
 
-## 🏗️ Model Architecture
+## 📂 Project Structure
 
 ```
-Input Text → Tokenizer → Embedding Layer → LSTM Layers → Linear → Softmax → Next Word
+LSTM-prediction-next-word-/
+├── train.py          # Training script (LSTM model + training loop)
+├── inference.py      # Standalone inference & interactive CLI
+├── Dataset.csv       # Q&A training data
+├── requirements.txt  # Dependencies
+└── README.md         # Documentation
 ```
 
-| Layer | Size |
-|-------|------|
-| Embedding | 128 |
-| LSTM Hidden | 256 |
-| LSTM Layers | 2 |
-| Vocabulary | Dynamic |
+---
+
+## 💡 Key Features
+
+- ⚡ **GPU ready** — auto-detects CUDA, falls back to CPU
+- 🔤 **GPT-4 tokenizer** — tiktoken cl100k_base (100k+ vocab)
+- 🧹 **Clean preprocessing** — removes duplicate punctuation
+- 🎛️ **Temperature sampling** — control creativity of output
+- 🛡️ **Error handling** — clear messages for missing model weights
+- 📦 **Kaggle compatible** — easy path config for cloud training
 
 ---
 
-## 📊 Results
+## 🗺️ Roadmap
 
-The model achieves strong perplexity scores on held-out test data with proper training.
+- [x] LSTM training from scratch
+- [x] GPT-4 tokenizer integration
+- [x] Standalone inference CLI
+- [ ] Pre-trained model weights upload
+- [ ] Streamlit / Gradio demo UI
+- [ ] Beam search decoding
+- [ ] Multi-layer LSTM support
 
 ---
 
-## 🌟 Star this repo if it helped you!
-
-[![GitHub stars](https://img.shields.io/github/stars/arbaz-builds/LSTM-prediction-next-word-?style=social)](https://github.com/arbaz-builds/LSTM-prediction-next-word-/stargazers)
-
----
-
-## 👨‍💻 Author
+## 👤 Author
 
 **Arbaz** — AI/ML Developer
-- GitHub: [@arbaz-builds](https://github.com/arbaz-builds)
-- Bio: 🤖 AI/ML Developer | FastMCP • LangChain • PyTorch
+🔗 [GitHub](https://github.com/arbaz-builds)
+
+---
+
+<div align="center">
+
+⭐ **If this helped you, drop a star — it keeps the project alive!** ⭐
+
+</div>
