@@ -1,5 +1,6 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch
-tiktoken
+tiktoken>=0.7.0
 pandas
 numpy
 
