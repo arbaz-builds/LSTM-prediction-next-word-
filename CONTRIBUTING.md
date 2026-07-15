@@ -1,19 +1,19 @@
 # Contributing to LSTM Next Word Prediction
 
-Thank you for your interest in contributing! 🎉
+Thank you for your interest in contributing!
 
 ## How to Contribute
 
-### 🐛 Reporting Bugs
-- Open an [Issue](https://github.com/Pokemon455/LSTM-prediction-next-word-/issues)
+### Reporting Bugs
+- Open an [Issue](https://github.com/arbaz-builds/LSTM-prediction-next-word-/issues)
 - Describe the bug clearly with steps to reproduce
 - Include your Python version and OS
 
-### 💡 Suggesting Features
+### Suggesting Features
 - Open an Issue with the label `enhancement`
 - Explain why this feature would be useful
 
-### 🔧 Submitting Code
+### Submitting Code
 1. Fork the repository
 2. Create a new branch: `git checkout -b feature/your-feature`
 3. Make your changes
@@ -30,4 +30,4 @@ Thank you for your interest in contributing! 🎉
 Open an issue or reach out via GitHub.
 
 ---
-Made with ❤️ by [Arbaz](https://github.com/Pokemon455)
+Maintained by [Mohammad Arbaz](https://github.com/arbaz-builds)
