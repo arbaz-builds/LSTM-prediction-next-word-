@@ -1,3 +1,4 @@
+import argparse
 import pandas as pd
 import tiktoken
 import torch
@@ -7,13 +8,22 @@ from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import re
 
+# ─── CLI args ───────────────────────────────────────────────────
+parser = argparse.ArgumentParser(description="Train the LSTM next-word predictor.")
+parser.add_argument("--data", type=str, default="Dataset.csv",
+                     help="Path to the training CSV (e.g. /kaggle/input/your-dataset/Dataset.csv on Kaggle).")
+parser.add_argument("--epochs", type=int, default=15, help="Number of training epochs.")
+parser.add_argument("--seq-length", type=int, default=512, help="Training sequence length.")
+parser.add_argument("--lr", type=float, default=1e-4, help="Learning rate.")
+parser.add_argument("--batch-size", type=int, default=32, help="Batch size.")
+args = parser.parse_args()
+
 # ─── Device Setup ───────────────────────────────────────────────
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
 # ─── Load Dataset ───────────────────────────────────────────────
-# Change path if running locally (default: Kaggle)
-df = pd.read_csv("Dataset.csv")
+df = pd.read_csv(args.data)
 answers = df["answer"].tolist()
 
 texts = []
@@ -36,7 +46,7 @@ all_tokens = tokenize(texts)
 print(f"Total tokens: {len(all_tokens)}")
 
 # ─── Dataset Class ───────────────────────────────────────────────
-SEQ_LENGTH = 512
+SEQ_LENGTH = args.seq_length
 
 class TokenDataset(Dataset):
     def __init__(self, tokens, seq_length):
@@ -55,7 +65,7 @@ class TokenDataset(Dataset):
         return torch.tensor(x, dtype=torch.long), torch.tensor(y, dtype=torch.long)
 
 dataset = TokenDataset(all_tokens, SEQ_LENGTH)
-dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
 
 # ─── LSTM Model ─────────────────────────────────────────────────
 class LSTMTextGenerator(nn.Module):
@@ -89,13 +99,12 @@ class LSTMTextGenerator(nn.Module):
 model = LSTMTextGenerator(vocab_size).to(device)
 
 # ─── Training ────────────────────────────────────────────────────
-optimizer = optim.Adam(model.parameters(), lr=0.0001)
+optimizer = optim.Adam(model.parameters(), lr=args.lr)
 criterion = nn.CrossEntropyLoss()
 
-EPOCHS = 15
 best_loss = float('inf')
 
-for epoch in range(EPOCHS):
+for epoch in range(args.epochs):
     model.train()
     total_loss = 0.0
 
@@ -110,20 +119,20 @@ for epoch in range(EPOCHS):
         total_loss += loss.item()
 
     avg_loss = total_loss / len(dataloader)
-    print(f"Epoch [{epoch+1}/{EPOCHS}] Loss: {avg_loss:.4f}")
+    print(f"Epoch [{epoch+1}/{args.epochs}] Loss: {avg_loss:.4f}")
 
     if avg_loss < best_loss:
         best_loss = avg_loss
         torch.save(model.state_dict(), "best_model.pth")
-        print(f"  ✅ Saved best model (loss: {best_loss:.4f})")
+        print(f"  Saved best model (loss: {best_loss:.4f})")
 
-# ─── Text Generation ─────────────────────────────────────────────
+# ─── Text Generation (quick sanity check) ────────────────────────
 def generate(prompt, max_tokens=50, temperature=0.8):
     model.eval()
     with torch.no_grad():
         tokens = enc.encode(prompt)
         for _ in range(max_tokens):
-            inp = torch.tensor([tokens[-512:]]).to(device)
+            inp = torch.tensor([tokens[-args.seq_length:]]).to(device)
             logits = model(inp)[:, -1, :] / temperature
             probs = torch.softmax(logits, dim=-1)
             next_tok = torch.multinomial(probs, 1).item()
@@ -133,5 +142,4 @@ def generate(prompt, max_tokens=50, temperature=0.8):
 print("\n--- Sample Output ---")
 print(generate("Hello, how are you", max_tokens=30))
 
-torch.save(model.state_dict(), "lstm_model.pth")
-print("\nModel saved as lstm_model.pth")
+print(f"\nTraining complete. Best model saved as best_model.pth (loss: {best_loss:.4f})")
