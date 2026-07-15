@@ -2,7 +2,4 @@
 torch
 pandas
 numpy
-
-# Web Server
-fastapi>=0.110.0
-uvicorn[standard]>=0.29.0
+tiktoken
