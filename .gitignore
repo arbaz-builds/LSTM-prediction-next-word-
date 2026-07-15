@@ -2,11 +2,10 @@
 __pycache__/
 *.py[cod]
 
-# Model weights (ignore by default, use !best_model.pth to include)
+# Model weights (ignore by default, keep best_model.pth)
 *.pth
 *.pt
 !best_model.pth
-!lstm_model.pth
 
 # Jupyter
 .ipynb_checkpoints/
