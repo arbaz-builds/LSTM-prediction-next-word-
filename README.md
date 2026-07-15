@@ -1,98 +1,101 @@
-<div align="center">
+# LSTM Next-Word Prediction
 
-# 🧠 LSTM Next Word Prediction
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://python.org)
+[![tiktoken](https://img.shields.io/badge/Tokenizer-tiktoken%20cl100k-412991)](https://github.com/openai/tiktoken)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-**A custom LSTM neural network that predicts the next word in any sentence — built from scratch with PyTorch & GPT-4 tokenizer.**
-
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org)
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![tiktoken](https://img.shields.io/badge/Tokenizer-tiktoken%20cl100k-412991?style=for-the-badge)](https://github.com/openai/tiktoken)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
-
-> *Like your phone keyboard suggestions — but powered by a real LSTM trained from scratch.*
-
-</div>
-
----
-
-## ✨ What It Does
-
-Type any partial sentence → the model predicts the **most likely next words**.
+An LSTM-based language model built from scratch in PyTorch that predicts the next tokens given a text prompt — using the same tokenizer as GPT-4 (`tiktoken`, `cl100k_base`).
 
 ```
 Input:  "The weather today is"
-Output: "The weather today is sunny and warm" ✅
+Output: "The weather today is sunny and warm"
 ```
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 Raw Text
    │
    ▼
-tiktoken (cl100k_base)        ← Same tokenizer as GPT-4
+tiktoken (cl100k_base)        ← same tokenizer as GPT-4, 100k+ vocab
    │
    ▼
 Token Embeddings (256-dim)
    │
    ▼
-LSTM Layer (512 hidden units)
+LSTM Layer (512 hidden units, 1 layer)
    │
    ▼
-FC Layers  →  ReLU  →  Dropout(0.3)
+FC(512→1024) → ReLU → Dropout(0.3) → FC(1024→512) → FC(512→vocab_size)
    │
    ▼
 Softmax → Next Token
 ```
 
 | Component | Detail |
-|-----------|--------|
-| **Tokenizer** | tiktoken `cl100k_base` (GPT-4 style) |
-| **Embedding** | 256-dim learned embeddings |
-| **LSTM** | 512 hidden units, 1 layer |
-| **Classifier** | 3-layer FC with ReLU + Dropout |
-| **Dataset** | Chatbot Q&A pairs (CSV) |
-| **Hardware** | Auto GPU/CPU detection |
+|---|---|
+| Tokenizer | `tiktoken` `cl100k_base` (GPT-4 style) |
+| Embedding | 256-dim, learned |
+| LSTM | 512 hidden units, 1 layer, batch-first |
+| Classifier head | 3-layer FC with ReLU + Dropout(0.3) |
+| Sequence length | 512 tokens (configurable) |
+| Training data | Q&A pairs from `Dataset.csv` |
+| Device | Auto-detects CUDA, falls back to CPU |
 
----
+## Project structure
 
-## 🛠️ Tech Stack
+```
+LSTM-prediction-next-word-/
+├── train.py           # Training script — CLI-configurable dataset path & hyperparameters
+├── inference.py        # Model loading + interactive text-generation CLI
+├── Dataset.csv          # Q&A training data
+├── requirements.txt     # Dependencies
+└── README.md
+```
 
-| Library | Purpose |
-|---------|---------|
-| `PyTorch` | LSTM model & training loop |
-| `tiktoken` | GPT-4 style tokenization |
-| `Pandas` | Dataset loading & preprocessing |
-| `NumPy` | Numerical operations |
+## Quick start
 
----
+### 1. Clone & install
 
-## 🚀 Quick Start
-
-### 1. Clone & Install
 ```bash
 git clone https://github.com/arbaz-builds/LSTM-prediction-next-word-.git
 cd LSTM-prediction-next-word-
 pip install -r requirements.txt
 ```
 
-### 2. Train the Model
+### 2. Train the model
+
 ```bash
 python train.py
 ```
-> 💡 **Kaggle users:** Update the dataset path in `train.py` to `/kaggle/input/your-dataset/`
 
-This will save `best_model.pth` in the project folder.
+Dataset path and hyperparameters are CLI-configurable:
 
-### 3. Run Inference
+```bash
+python train.py --data /kaggle/input/your-dataset/Dataset.csv --epochs 20 --lr 0.0001
+```
+
+| Flag | Default | Purpose |
+|---|---|---|
+| `--data` | `Dataset.csv` | Path to the training CSV |
+| `--epochs` | `15` | Number of training epochs |
+| `--seq-length` | `512` | Training sequence length |
+| `--lr` | `0.0001` | Learning rate |
+| `--batch-size` | `32` | Batch size |
+
+The best checkpoint (lowest training loss) is saved to `best_model.pth`.
+
+### 3. Run inference
+
 ```bash
 python inference.py
 ```
 
 ```
-🧠 LSTM Text Generator
+LSTM Text Generator
    Device  : cuda
    Vocab   : 100,277 tokens
    Type 'exit' to quit
@@ -101,53 +104,45 @@ Prompt: The weather today is
 Output: The weather today is sunny and pleasant outside
 ```
 
----
+## Key features
 
-## 📂 Project Structure
+- Auto-detects CUDA, falls back to CPU — no manual device configuration needed
+- GPT-4-compatible tokenizer (`tiktoken` `cl100k_base`, 100k+ vocab)
+- CLI-configurable training — dataset path and hyperparameters don't require editing the script
+- Temperature-controlled sampling at inference time
+- Clear error handling — `inference.py` exits with a helpful message if `best_model.pth` is missing
 
-```
-LSTM-prediction-next-word-/
-├── train.py          # Training script (LSTM model + training loop)
-├── inference.py      # Standalone inference & interactive CLI
-├── Dataset.csv       # Q&A training data
-├── requirements.txt  # Dependencies
-└── README.md         # Documentation
-```
+## Known limitations
 
----
+- **Single-layer LSTM** — no stacked layers or bidirectional variant yet
+- **No beam search** — inference uses multinomial sampling only
+- **No pretrained weights shipped** — the model must be trained locally before `inference.py` will run
+- **Fixed sequence length at inference** — `inference.py` currently hardcodes `SEQ_LENGTH=512`; if you train with a different `--seq-length`, update this constant to match
 
-## 💡 Key Features
-
-- ⚡ **GPU ready** — auto-detects CUDA, falls back to CPU
-- 🔤 **GPT-4 tokenizer** — tiktoken cl100k_base (100k+ vocab)
-- 🧹 **Clean preprocessing** — removes duplicate punctuation
-- 🎛️ **Temperature sampling** — control creativity of output
-- 🛡️ **Error handling** — clear messages for missing model weights
-- 📦 **Kaggle compatible** — easy path config for cloud training
-
----
-
-## 🗺️ Roadmap
+## Roadmap
 
 - [x] LSTM training from scratch
-- [x] GPT-4 tokenizer integration
-- [x] Standalone inference CLI
-- [ ] Pre-trained model weights upload
+- [x] GPT-4-compatible tokenizer integration
+- [x] CLI-configurable training script
+- [ ] Pretrained model weights release
 - [ ] Streamlit / Gradio demo UI
 - [ ] Beam search decoding
-- [ ] Multi-layer LSTM support
+- [ ] Multi-layer / bidirectional LSTM support
 
----
+## Tech stack
 
-## 👤 Author
+| Library | Purpose |
+|---|---|
+| PyTorch | LSTM model definition & training loop |
+| tiktoken | GPT-4-style tokenization |
+| Pandas | Dataset loading & preprocessing |
+| NumPy | Numerical operations |
 
-**Arbaz** — AI/ML Developer
-🔗 [GitHub](https://github.com/arbaz-builds)
+## Author
 
----
+**Mohammad Arbaz** — AI/ML Developer
+[GitHub @arbaz-builds](https://github.com/arbaz-builds)
 
-<div align="center">
+## License
 
-⭐ **If this helped you, drop a star — it keeps the project alive!** ⭐
-
-</div>
+MIT — see [LICENSE](LICENSE).
